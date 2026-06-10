@@ -1,0 +1,70 @@
+{
+  "categories": {
+    "prize": {
+      "name": "景品",
+      "description": "夹娃娃机、抽奖类低价位手办"
+    },
+    "scale": {
+      "name": "比例手办",
+      "description": "1/7、1/8 等固定比例收藏手办"
+    },
+    "action": {
+      "name": "可动模型",
+      "description": "figma、SHF 等可动关节模型"
+    }
+  },
+  "dimensions": [
+    {
+      "key": "painting",
+      "label": "涂装",
+      "description": "漆面均匀度、色彩还原、溢色情况",
+      "weight": 0.25,
+      "required": true,
+      "categories": ["prize", "scale", "action"]
+    },
+    {
+      "key": "craftsmanship",
+      "label": "做工",
+      "description": "模具精度、分模线、接缝处理",
+      "weight": 0.25,
+      "required": true,
+      "categories": ["prize", "scale", "action"]
+    },
+    {
+      "key": "box",
+      "label": "盒损",
+      "description": "外盒破损、压痕、磨损程度",
+      "weight": 0.15,
+      "required": true,
+      "categories": ["prize", "scale", "action"]
+    },
+    {
+      "key": "accessories",
+      "label": "配件完整度",
+      "description": "替换件、底座、说明书等是否齐全",
+      "weight": 0.15,
+      "required": true,
+      "categories": ["prize", "scale", "action"]
+    },
+    {
+      "key": "articulation",
+      "label": "可动关节",
+      "description": "关节灵活度、把持力、松紧度",
+      "weight": 0.20,
+      "required": false,
+      "categories": ["action"]
+    },
+    {
+      "key": "sculpt",
+      "label": "原型雕刻",
+      "description": "造型还原度、细节表现力",
+      "weight": 0.20,
+      "required": false,
+      "categories": ["scale"]
+    }
+  ],
+  "gradeThresholds": {
+    "masterpiece": 85,
+    "good": 70
+  }
+}
