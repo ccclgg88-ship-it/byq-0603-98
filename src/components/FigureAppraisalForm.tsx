@@ -1,5 +1,6 @@
 import { useMemo, useCallback } from 'react';
-import { Sparkles, Send, RotateCcw } from 'lucide-react';
+import { Sparkles, Send, RotateCcw, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { twMerge } from 'tailwind-merge';
 import { useAppraisalStore } from '@/store/useAppraisalStore';
 import { getDimensionsByCategory } from '@/utils/scoring';
 import { useDraftStorage, clearDraft as clearLocalDraft } from '@/hooks/useDraftStorage';
@@ -13,15 +14,18 @@ export function FigureAppraisalForm() {
     scores,
     errors,
     draftSavedAt,
+    submitted,
     setCategory,
     setScore,
     validateField,
     validateAll,
     restoreState,
+    setSubmitted,
     reset,
   } = useAppraisalStore();
 
   const dimensions = useMemo(() => getDimensionsByCategory(category), [category]);
+  const errorCount = Object.values(errors).filter((e) => e && e.trim()).length;
 
   const handleRestore = useCallback(
     (state: Parameters<typeof restoreState>[0]) => {
@@ -46,10 +50,11 @@ export function FigureAppraisalForm() {
       e.preventDefault();
       const isValid = validateAll();
       if (isValid) {
-        console.log('提交评分:', { category, scores });
+        setSubmitted(true);
+        window.setTimeout(() => setSubmitted(false), 3000);
       }
     },
-    [validateAll, category, scores]
+    [validateAll, setSubmitted]
   );
 
   const handleReset = useCallback(() => {
@@ -59,6 +64,34 @@ export function FigureAppraisalForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5 w-full" noValidate>
+      {submitted && (
+        <div
+          className={twMerge(
+            'flex items-center gap-2.5 px-4 py-3 rounded-2xl border animate-fade-in',
+            'bg-emerald-500/15 border-emerald-400/30'
+          )}
+          role="status"
+          aria-live="polite"
+        >
+          <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+          <span className="text-sm font-medium text-emerald-300">
+            鉴定提交成功！评分结果已生成
+          </span>
+        </div>
+      )}
+
+      {!submitted && errorCount > 0 && (
+        <div
+          className="flex items-center gap-2.5 px-4 py-3 rounded-2xl border animate-fade-in bg-amber-500/10 border-amber-400/30"
+          role="alert"
+        >
+          <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0" />
+          <span className="text-sm font-medium text-amber-300">
+            存在 {errorCount} 项待修正，请检查红色提示的字段
+          </span>
+        </div>
+      )}
+
       <DraftStatusBar savedAt={draftSavedAt} onClear={handleClearDraft} />
 
       <CategorySelector value={category} onChange={setCategory} />
@@ -90,12 +123,14 @@ export function FigureAppraisalForm() {
         <button
           type="submit"
           tabIndex={dimensions.length + 2}
-          className="flex-1 flex items-center justify-center gap-2 py-3 px-5 rounded-2xl font-semibold text-white
-            bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500
-            hover:from-pink-400 hover:via-fuchsia-400 hover:to-purple-400
-            shadow-lg shadow-pink-500/30 hover:shadow-pink-500/50
-            transition-all duration-300 transform hover:-translate-y-0.5
-            focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1a0a2e]"
+          className={twMerge(
+            'flex-1 flex items-center justify-center gap-2 py-3 px-5 rounded-2xl font-semibold text-white',
+            'bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500',
+            'hover:from-pink-400 hover:via-fuchsia-400 hover:to-purple-400',
+            'shadow-lg shadow-pink-500/30 hover:shadow-pink-500/50',
+            'transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0',
+            'focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1a0a2e]'
+          )}
         >
           <Send className="w-4 h-4" />
           提交鉴定
@@ -105,11 +140,13 @@ export function FigureAppraisalForm() {
           type="button"
           onClick={handleReset}
           tabIndex={dimensions.length + 3}
-          className="flex items-center justify-center gap-2 py-3 px-5 rounded-2xl font-medium text-gray-300
-            bg-white/5 border border-white/10
-            hover:bg-white/10 hover:text-white hover:border-white/20
-            transition-all duration-300
-            focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1a0a2e]"
+          className={twMerge(
+            'flex items-center justify-center gap-2 py-3 px-5 rounded-2xl font-medium text-gray-300',
+            'bg-white/5 border border-white/10',
+            'hover:bg-white/10 hover:text-white hover:border-white/20',
+            'transition-all duration-300 active:scale-[0.98]',
+            'focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1a0a2e]'
+          )}
         >
           <RotateCcw className="w-4 h-4" />
           重置

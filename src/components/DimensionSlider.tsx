@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AlertCircle, Asterisk } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import type { Dimension } from '@/types/appraisal';
@@ -21,10 +21,23 @@ export function DimensionSlider({
   onBlur,
   tabIndex,
 }: DimensionSliderProps) {
-  const [inputValue, setInputValue] = useState<string>(value?.toString() ?? '');
+  const [inputValue, setInputValue] = useState<string>(
+    value !== null && value !== undefined ? value.toString() : ''
+  );
+
+  useEffect(() => {
+    const expected =
+      value !== null && value !== undefined ? value.toString() : '';
+    if (inputValue !== expected) {
+      setInputValue(expected);
+    }
+  }, [value]);
 
   const hasError = Boolean(error);
-  const percent = value !== null ? ((value - MIN_SCORE) / (MAX_SCORE - MIN_SCORE)) * 100 : 0;
+  const percent =
+    value !== null && value !== undefined
+      ? ((value - MIN_SCORE) / (MAX_SCORE - MIN_SCORE)) * 100
+      : 0;
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const num = Number(e.target.value);
@@ -43,8 +56,14 @@ export function DimensionSlider({
     const num = parseScoreInput(inputValue);
     if (num !== null) {
       const clamped = Math.max(MIN_SCORE, Math.min(MAX_SCORE, num));
-      setInputValue(clamped.toString());
-      onChange(clamped);
+      const clampedStr = clamped.toString();
+      if (clampedStr !== inputValue) {
+        setInputValue(clampedStr);
+        onChange(clamped);
+      }
+    } else if (inputValue.trim() !== '') {
+      setInputValue('');
+      onChange(null);
     }
     onBlur();
   };

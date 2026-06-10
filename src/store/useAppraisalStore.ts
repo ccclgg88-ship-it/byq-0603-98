@@ -4,6 +4,7 @@ import { filterStateByCategory, getDimensionsByCategory } from '@/utils/scoring'
 import { validateScore, validateAllScores } from '@/utils/validation';
 
 interface AppraisalStore extends AppraisalFormState {
+  submitted: boolean;
   setCategory: (category: FigureCategory) => void;
   setScore: (key: string, value: number | null) => void;
   setError: (key: string, error: string) => void;
@@ -11,6 +12,7 @@ interface AppraisalStore extends AppraisalFormState {
   validateAll: () => boolean;
   restoreState: (state: AppraisalFormState) => void;
   clearDraftTime: () => void;
+  setSubmitted: (value: boolean) => void;
   reset: () => void;
 }
 
@@ -23,6 +25,7 @@ const initialState: AppraisalFormState = {
 
 export const useAppraisalStore = create<AppraisalStore>((set, get) => ({
   ...initialState,
+  submitted: false,
 
   setCategory: (category) => {
     const current = get();
@@ -31,20 +34,22 @@ export const useAppraisalStore = create<AppraisalStore>((set, get) => ({
   },
 
   setScore: (key, value) => {
-    set((state) => ({
-      scores: { ...state.scores, [key]: value },
-      errors: { ...state.errors, [key]: '' },
-    }));
-
-    const state = get();
-    const dimensions = getDimensionsByCategory(state.category);
-    const dim = dimensions.find((d) => d.key === key);
-    if (dim) {
-      const error = validateScore(value, dim);
-      if (error) {
-        set((s) => ({ errors: { ...s.errors, [key]: error } }));
+    let dim;
+    set((state) => {
+      const dimensions = getDimensionsByCategory(state.category);
+      dim = dimensions.find((d) => d.key === key);
+      const nextErrors = { ...state.errors };
+      if (dim) {
+        const err = validateScore(value, dim);
+        nextErrors[key] = err;
+      } else {
+        nextErrors[key] = '';
       }
-    }
+      return {
+        scores: { ...state.scores, [key]: value },
+        errors: nextErrors,
+      };
+    });
   },
 
   setError: (key, error) => {
@@ -54,32 +59,41 @@ export const useAppraisalStore = create<AppraisalStore>((set, get) => ({
   },
 
   validateField: (key) => {
-    const state = get();
-    const dimensions = getDimensionsByCategory(state.category);
-    const dim = dimensions.find((d) => d.key === key);
-    if (!dim) return;
-
-    const error = validateScore(state.scores[key] ?? null, dim);
-    set((s) => ({ errors: { ...s.errors, [key]: error } }));
+    set((state) => {
+      const dimensions = getDimensionsByCategory(state.category);
+      const dim = dimensions.find((d) => d.key === key);
+      if (!dim) return state;
+      const error = validateScore(state.scores[key] ?? null, dim);
+      return {
+        errors: { ...state.errors, [key]: error },
+      };
+    });
   },
 
   validateAll: () => {
-    const state = get();
-    const dimensions = getDimensionsByCategory(state.category);
-    const errors = validateAllScores(state.scores, dimensions);
-    set({ errors });
-    return Object.keys(errors).length === 0;
+    let isValid = false;
+    set((state) => {
+      const dimensions = getDimensionsByCategory(state.category);
+      const errors = validateAllScores(state.scores, dimensions);
+      isValid = Object.keys(errors).length === 0;
+      return { errors };
+    });
+    return isValid;
   },
 
   restoreState: (state) => {
-    set(state);
+    set({ ...state, submitted: false });
   },
 
   clearDraftTime: () => {
     set({ draftSavedAt: null });
   },
 
+  setSubmitted: (value) => {
+    set({ submitted: value });
+  },
+
   reset: () => {
-    set({ ...initialState });
+    set({ ...initialState, submitted: false });
   },
 }));

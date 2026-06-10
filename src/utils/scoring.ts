@@ -26,7 +26,7 @@ export const GRADE_CONFIGS: Record<GradeLevel, GradeConfig> = {
 };
 
 export function getDimensionsByCategory(category: FigureCategory): Dimension[] {
-  return scoringConfig.dimensions.filter((d) => d.categories.includes(category));
+  return (scoringConfig.dimensions as Dimension[]).filter((d) => d.categories.includes(category));
 }
 
 export function calculateWeightedScore(
