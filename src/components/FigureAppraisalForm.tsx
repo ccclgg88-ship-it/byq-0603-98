@@ -1,7 +1,8 @@
-import { useMemo, useCallback } from 'react';
-import { Sparkles, Send, RotateCcw, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { useMemo, useCallback, useState } from 'react';
+import { Sparkles, Send, RotateCcw, CheckCircle2, AlertTriangle, Tag } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useAppraisalStore } from '@/store/useAppraisalStore';
+import { useHistoryStore } from '@/store/useHistoryStore';
 import { getDimensionsByCategory } from '@/utils/scoring';
 import { useDraftStorage, clearDraft as clearLocalDraft } from '@/hooks/useDraftStorage';
 import { CategorySelector } from './CategorySelector';
@@ -10,22 +11,28 @@ import { DraftStatusBar } from './DraftStatusBar';
 
 export function FigureAppraisalForm() {
   const {
+    name,
     category,
     scores,
     errors,
     draftSavedAt,
     submitted,
+    setName,
     setCategory,
     setScore,
     validateField,
     validateAll,
     restoreState,
     setSubmitted,
+    buildRecord,
     reset,
   } = useAppraisalStore();
 
+  const addNewRecord = useHistoryStore((s) => s.addNewRecord);
+
   const dimensions = useMemo(() => getDimensionsByCategory(category), [category]);
   const errorCount = Object.values(errors).filter((e) => e && e.trim()).length;
+  const [saving, setSaving] = useState(false);
 
   const handleRestore = useCallback(
     (state: Parameters<typeof restoreState>[0]) => {
@@ -35,7 +42,7 @@ export function FigureAppraisalForm() {
   );
 
   const { clear: clearStorage } = useDraftStorage(
-    { category, scores, errors, draftSavedAt },
+    { category, scores, errors, draftSavedAt, name } as Parameters<typeof useDraftStorage>[0],
     handleRestore
   );
 
@@ -46,15 +53,24 @@ export function FigureAppraisalForm() {
   }, [clearStorage, reset]);
 
   const handleSubmit = useCallback(
-    (e: React.FormEvent) => {
+    async (e: React.FormEvent) => {
       e.preventDefault();
       const isValid = validateAll();
-      if (isValid) {
+      if (!isValid) return;
+
+      try {
+        setSaving(true);
+        const record = buildRecord();
+        await addNewRecord(record);
         setSubmitted(true);
         window.setTimeout(() => setSubmitted(false), 3000);
+      } catch (err) {
+        console.error('保存鉴定记录失败:', err);
+      } finally {
+        setSaving(false);
       }
     },
-    [validateAll, setSubmitted]
+    [validateAll, buildRecord, addNewRecord, setSubmitted]
   );
 
   const handleReset = useCallback(() => {
@@ -75,7 +91,7 @@ export function FigureAppraisalForm() {
         >
           <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
           <span className="text-sm font-medium text-emerald-300">
-            鉴定提交成功！评分结果已生成
+            鉴定提交成功！已保存到历史档案
           </span>
         </div>
       )}
@@ -95,6 +111,20 @@ export function FigureAppraisalForm() {
       <DraftStatusBar savedAt={draftSavedAt} onClear={handleClearDraft} />
 
       <CategorySelector value={category} onChange={setCategory} />
+
+      <div className="relative">
+        <div className="absolute left-3 top-1/2 -translate-y-1/2">
+          <Tag className="w-4 h-4 text-pink-400 shrink-0" />
+        </div>
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="输入手办名称（可选，留空将自动生成）"
+          className="w-full pl-10 pr-4 py-3 rounded-2xl bg-white/5 border border-white/10 text-white placeholder:text-gray-600 focus:outline-none focus:border-pink-400/50 focus:ring-2 focus:ring-pink-400/20 transition-all"
+          maxLength={50}
+        />
+      </div>
 
       <div className="space-y-3">
         <div className="flex items-center gap-2">
@@ -122,6 +152,7 @@ export function FigureAppraisalForm() {
       <div className="flex flex-col sm:flex-row gap-3 pt-2">
         <button
           type="submit"
+          disabled={saving}
           tabIndex={dimensions.length + 2}
           className={twMerge(
             'flex-1 flex items-center justify-center gap-2 py-3 px-5 rounded-2xl font-semibold text-white',
@@ -129,11 +160,12 @@ export function FigureAppraisalForm() {
             'hover:from-pink-400 hover:via-fuchsia-400 hover:to-purple-400',
             'shadow-lg shadow-pink-500/30 hover:shadow-pink-500/50',
             'transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0',
-            'focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1a0a2e]'
+            'focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1a0a2e]',
+            saving ? 'opacity-70 cursor-not-allowed' : ''
           )}
         >
           <Send className="w-4 h-4" />
-          提交鉴定
+          {saving ? '保存中...' : '提交鉴定'}
         </button>
 
         <button

@@ -2,6 +2,7 @@ import { Star, ScanLine } from 'lucide-react';
 import { FigureAppraisalForm } from '@/components/FigureAppraisalForm';
 import { DimensionRadar } from '@/components/DimensionRadar';
 import { GradeBadge } from '@/components/GradeBadge';
+import { NavBar } from '@/components/NavBar';
 
 export function AppraisalPage() {
   return (
@@ -23,43 +24,47 @@ export function AppraisalPage() {
         }}
       />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
-        <header className="text-center mb-8 sm:mb-12 animate-fade-in">
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <div className="relative">
-              <ScanLine className="w-7 h-7 sm:w-8 sm:h-8 text-pink-400" />
-              <Star className="absolute -top-1 -right-1 w-3 h-3 text-yellow-400 fill-yellow-400 animate-twinkle" />
-            </div>
-            <h1 className="text-2xl sm:text-4xl font-black bg-gradient-to-r from-pink-400 via-fuchsia-400 to-purple-400 bg-clip-text text-transparent tracking-tight">
-              手办品相鉴定系统
-            </h1>
-          </div>
-          <p className="text-sm sm:text-base text-gray-400 max-w-md mx-auto leading-relaxed">
-            多维度评分 · 加权算法 · 客观定级
-          </p>
-        </header>
+      <div className="relative z-10">
+        <NavBar />
 
-        <main className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-          <section className="lg:col-span-3 space-y-5">
-            <div className="p-5 sm:p-7 rounded-3xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] shadow-2xl shadow-black/20">
-              <FigureAppraisalForm />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+          <header className="text-center mb-8 sm:mb-12 animate-fade-in">
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <div className="relative">
+                <ScanLine className="w-7 h-7 sm:w-8 sm:h-8 text-pink-400" />
+                <Star className="absolute -top-1 -right-1 w-3 h-3 text-yellow-400 fill-yellow-400 animate-twinkle" />
+              </div>
+              <h1 className="text-2xl sm:text-4xl font-black bg-gradient-to-r from-pink-400 via-fuchsia-400 to-purple-400 bg-clip-text text-transparent tracking-tight">
+                手办品相鉴定系统
+              </h1>
             </div>
-          </section>
+            <p className="text-sm sm:text-base text-gray-400 max-w-md mx-auto leading-relaxed">
+              多维度评分 · 加权算法 · 客观定级
+            </p>
+          </header>
 
-          <aside className="lg:col-span-2 space-y-5">
-            <div className="p-5 sm:p-7 rounded-3xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] shadow-2xl shadow-black/20">
-              <GradeBadge />
-            </div>
+          <main className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            <section className="lg:col-span-3 space-y-5">
+              <div className="p-5 sm:p-7 rounded-3xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] shadow-2xl shadow-black/20">
+                <FigureAppraisalForm />
+              </div>
+            </section>
 
-            <div className="p-5 sm:p-7 rounded-3xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] shadow-2xl shadow-black/20">
-              <DimensionRadar />
-            </div>
-          </aside>
-        </main>
+            <aside className="lg:col-span-2 space-y-5">
+              <div className="p-5 sm:p-7 rounded-3xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] shadow-2xl shadow-black/20">
+                <GradeBadge />
+              </div>
 
-        <footer className="mt-10 sm:mt-14 text-center text-xs text-gray-600">
-          <p>评分结果仅供参考 · 数据存储于本地浏览器，7天后自动过期清除</p>
-        </footer>
+              <div className="p-5 sm:p-7 rounded-3xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] shadow-2xl shadow-black/20">
+                <DimensionRadar />
+              </div>
+            </aside>
+          </main>
+
+          <footer className="mt-10 sm:mt-14 text-center text-xs text-gray-600">
+            <p>评分结果仅供参考 · 数据存储于本地浏览器，7天后自动过期清除</p>
+          </footer>
+        </div>
       </div>
     </div>
   );

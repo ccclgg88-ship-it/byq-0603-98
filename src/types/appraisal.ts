@@ -45,3 +45,27 @@ export interface GradeConfig {
   glowColor: string;
   description: string;
 }
+
+export interface AppraisalRecord {
+  id: string;
+  name: string;
+  category: FigureCategory;
+  scores: Record<string, number>;
+  weightedScore: number;
+  gradeLevel: GradeLevel;
+  dimensions: Dimension[];
+  note?: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export type SortField = 'createdAt' | 'weightedScore' | 'name';
+export type SortOrder = 'asc' | 'desc';
+
+export interface HistoryFilter {
+  category?: FigureCategory | 'all';
+  grade?: GradeLevel | 'all';
+  keyword?: string;
+  sortField: SortField;
+  sortOrder: SortOrder;
+}
